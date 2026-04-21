@@ -36,7 +36,6 @@ fun Pantalla1() {
     val vm : Pantalla1ViewModel = viewModel()
     val lazyPagingItems = vm.itemsFlow.collectAsLazyPagingItems()
 
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -60,7 +59,7 @@ fun InfiniteScrollScreen(vm: Pantalla1ViewModel, lazyPagingItems: LazyPagingItem
         contentPadding = PaddingValues(16.dp)
     ) {
         items(lazyPagingItems.itemCount,
-            // CLAU CRUCIAL:: Usa un identificador únic del teu objecte
+            // POSAR-LI UNA CLAU ÉS CRUCIAL :: Usa un identificador únic del teu objecte!!
             key = { index ->
                 val item = lazyPagingItems.peek(index)
                 item?.id ?: index
@@ -73,7 +72,8 @@ fun InfiniteScrollScreen(vm: Pantalla1ViewModel, lazyPagingItems: LazyPagingItem
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 8.dp)
+                        .padding(vertical = 8.dp),
+                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
                 ) {
                     var desc :String = " ${item.id} :: ${item.description}"
 
