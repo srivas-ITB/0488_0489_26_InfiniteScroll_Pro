@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -23,77 +24,70 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-
+import androidx.paging.LoadState
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
+import com.example.app26_InfiniteScroll_Pro.ui.viewmodel.Pantalla1ViewModel
 
 @Composable
 fun Pantalla1() {
+    // Convertim el Flow a un estat que Compose entengui
+    val vm : Pantalla1ViewModel = viewModel()
+    val lazyPagingItems = vm.itemsFlow.collectAsLazyPagingItems()
 
-    val vm: PostViewModel = viewModel()
 
-    LaunchedEffect(Unit) {
-            vm.loadNextPage()
-        }
-
-    Column(modifier = Modifier.fillMaxSize().padding(20.dp),
-        horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(20.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         Spacer(modifier = Modifier.height(20.dp))
 
-        Text("Quantitat de registes carregats: ${vm.items.size}" )
+        Text("Quantitat de registes carregats: ${lazyPagingItems.itemCount}")
 
         Spacer(modifier = Modifier.height(20.dp))
-        InfiniteScrollScreen(vm)
+        InfiniteScrollScreen(vm, lazyPagingItems)
     }
-
-
 }
 
 @Composable
-fun InfiniteScrollScreen(viewModel: PostViewModel = viewModel()) {
-    val listState = rememberLazyListState()
-
-    // Detectem si l'usuari s'apropa al final de la llista
-    val shouldLoadMore = remember {
-        derivedStateOf {
-            val lastVisibleItem = listState.layoutInfo.visibleItemsInfo.lastOrNull()
-            // Si l'últim element visible és un dels 5 últims de la llista, carreguem més
-            lastVisibleItem?.index != null && lastVisibleItem.index >= listState.layoutInfo.totalItemsCount - 5
-        }
-    }
-
-    // Llançarem la càrrega quan el 'derivedStateOf' ens ho indiqui
-    LaunchedEffect(shouldLoadMore.value) {
-        if (shouldLoadMore.value && !viewModel.isLoading) {
-            viewModel.loadNextPage()
-        }
-    }
+fun InfiniteScrollScreen(vm: Pantalla1ViewModel, lazyPagingItems: LazyPagingItems<String>) {
 
     LazyColumn(
-        state = listState,
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp)
     ) {
-        items(viewModel.items) { item ->
-            Card(
-                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-            ) {
-                Text(text = item, modifier = Modifier.padding(24.dp))
-            }
-        }
-
-        // Mostrem un indicador de càrrega al final de tot
-        if (viewModel.isLoading) {
-            item {
-                Box(
-                    modifier = Modifier.fillMaxWidth().padding(16.dp),
-                    contentAlignment = Alignment.Center
+        items(lazyPagingItems.itemCount) { index ->
+            val item = lazyPagingItems[index]
+            if (item != null) {
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp)
                 ) {
-                    CircularProgressIndicator()
+                    Text(text = item, modifier = Modifier.padding(24.dp))
                 }
             }
         }
+
+        // Gestió de l'estat de càrrega al final
+        when (val state = lazyPagingItems.loadState.append) {
+            is LoadState.Loading -> {
+                item {
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .wrapContentWidth()
+                    )
+                }
+            }
+
+            is LoadState.Error -> {
+                item { Text("Error en carregar més dades") }
+            }
+
+            else -> {}
+        }
     }
 }
-
-
-
