@@ -27,6 +27,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
+import com.example.app26_InfiniteScroll_Pro.data.entity.MyData
 import com.example.app26_InfiniteScroll_Pro.ui.viewmodel.Pantalla1ViewModel
 
 @Composable
@@ -52,13 +53,21 @@ fun Pantalla1() {
 }
 
 @Composable
-fun InfiniteScrollScreen(vm: Pantalla1ViewModel, lazyPagingItems: LazyPagingItems<String>) {
+fun InfiniteScrollScreen(vm: Pantalla1ViewModel, lazyPagingItems: LazyPagingItems<MyData>) {
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp)
     ) {
-        items(lazyPagingItems.itemCount) { index ->
+        items(lazyPagingItems.itemCount,
+            // CLAU CRUCIAL:: Usa un identificador únic del teu objecte
+            key = { index ->
+                val item = lazyPagingItems.peek(index)
+                item?.id ?: index
+            }
+
+        )
+        { index ->
             val item = lazyPagingItems[index]
             if (item != null) {
                 Card(
@@ -66,7 +75,9 @@ fun InfiniteScrollScreen(vm: Pantalla1ViewModel, lazyPagingItems: LazyPagingItem
                         .fillMaxWidth()
                         .padding(vertical = 8.dp)
                 ) {
-                    Text(text = item, modifier = Modifier.padding(24.dp))
+                    var desc :String = " ${item.id} :: ${item.description}"
+
+                    Text(text = desc, modifier = Modifier.padding(24.dp))
                 }
             }
         }

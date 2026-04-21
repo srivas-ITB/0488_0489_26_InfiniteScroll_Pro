@@ -1,6 +1,9 @@
-# App 25 InfiniteScroll_Basic
+# App 26 InfiniteScroll_Pro
 
-Gestió bàsica per fer un scroll infinit:
+Gestió avançada per fer un scroll infinit:
+
+<<<<<  Canviar!!!!
+
     - La Pantalla1 conté un component InfiniteScrollScreen que realment és un LazyColum amb la gestió de la càrrega dels següents elements
     - El viewModel simula la càrrega de nous elements, esperant un temps per simular la latència d'accés a una API i afegint nous elements a la llista de resultats
 
